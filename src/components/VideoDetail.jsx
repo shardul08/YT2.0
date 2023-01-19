@@ -9,22 +9,26 @@ import { fetchFromAPI } from '../utils/fetchFromAPI';
 
 const VideoDetail = () => {
     const [videoDetail, setVideoDetail] = useState(null);
+    const [videos, setVideos] = useState([]);
     const { id } = useParams();
 
     useEffect(() => {
         fetchFromAPI(`videos?part=snippet,statistics&id=${id}`)
             .then((data) => {setVideoDetail(data.items[0])});
+        
+            fetchFromAPI(`search?relatedToVideoId=${id}&part=snippet&type=video`)
+            .then((data) => {setVideos(data.items)});
     }, [id])
 
     if(!videoDetail?.snippet)
         return 'Loading...';    
     const { snippet : { title, channelId, channelTitle}, statistics: { viewCount, likeCount} } = videoDetail;
-
+    console.log(videos);
     return (
         <Box minHeight='95vh'>
             <Stack direction={{ xs: 'column', md:'row' }}>
                 <Box flex={1}>
-                    <Box sx={{ position: 'sticky', width: '100%'}}>
+                    <Box sx={{ position: 'sticky', width: '100%', top: '86px' }}>
                         <ReactPlayer 
                             url={`https://www.youtube.com/watch?v=${id}`}
                             className='react-player'
@@ -50,6 +54,9 @@ const VideoDetail = () => {
                             </Stack>
                         </Stack>
                     </Box>
+                </Box>
+                <Box px={2} py={{ md: 1, xs: 5}} justifyContent='center' alignItems={'center'}>
+                    <Videos videos={videos} direction='column'/>
                 </Box>
             </Stack>
         </Box>
